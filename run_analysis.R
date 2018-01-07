@@ -19,19 +19,21 @@ measurements <- gsub('[-()]', '', measurements)
 
 # Load training datasets
 train <- fread(file.path(path, "UCI HAR Dataset/train/X_train.txt"))[, featuresWanted, with = FALSE]
-setnames(train, colnames(train), measurements)
-trainActivities <- fread(file.path(path, "UCI HAR Dataset/train/Y_train.txt"), col.names = c("Activity"))
-trainSubjects <- fread(file.path(path, "UCI HAR Dataset/train/subject_train.txt"), col.names = c("SubjectNum"))
-train <- cbind(trainSubjects, trainActivities, train)
-
 # Load test datasets
 test <- fread(file.path(path, "UCI HAR Dataset/test/X_test.txt"))[, featuresWanted, with = FALSE]
+
+setnames(train, colnames(train), measurements)
 setnames(test, colnames(test), measurements)
+
+trainActivities <- fread(file.path(path, "UCI HAR Dataset/train/Y_train.txt"), col.names = c("Activity"))
 testActivities <- fread(file.path(path, "UCI HAR Dataset/test/Y_test.txt"), col.names = c("Activity"))
+
+trainSubjects <- fread(file.path(path, "UCI HAR Dataset/train/subject_train.txt"), col.names = c("SubjectNum"))
 testSubjects <- fread(file.path(path, "UCI HAR Dataset/test/subject_test.txt"), col.names = c("SubjectNum"))
-test <- cbind(testSubjects, testActivities, test)
 
 # Merges the training and the test sets to create one data set.
+train <- cbind(trainSubjects, trainActivities, train)
+test <- cbind(testSubjects, testActivities, test)
 final <- rbind(train, test)
 
 # Appropriately labels the data set with descriptive variable names.
@@ -42,4 +44,4 @@ final[["SubjectNum"]] <- as.factor(final[, SubjectNum])
 final <- melt(data = final, id = c("SubjectNum", "Activity"))
 final <- dcast(data = final, SubjectNum + Activity ~ variable, fun.aggregate = mean)
 
-fwrite(x = final, file = "tidyData.txt", quote = FALSE)
+fwrite(x = final, file = "tidyData.txt", row.names = FALSE, col.names = FALSE, quote = FALSE)
